@@ -80,6 +80,9 @@
 
     <!-- Tour Guide (First-time users) -->
     <TourGuide />
+
+    <!-- Registration Form -->
+    <RegistrationForm @complete="handleRegistration" />
   </div>
 </template>
 
@@ -100,6 +103,7 @@ import MCPManager from './components/MCPManager.vue'
 import SocialMediaManager from './components/SocialMediaManager.vue'
 import TourGuide from './components/TourGuide.vue'
 import LLMCouncil from './components/LLMCouncil.vue'
+import RegistrationForm from './components/RegistrationForm.vue'
 
 interface Message {
   id: number
@@ -209,6 +213,12 @@ function quickAction(action: string) {
 
   inputText.value = actionMessages[action] || ''
   sendMessage()
+}
+
+function handleRegistration(data: any) {
+  console.log('User registered:', data)
+  // Initialize metaphysics engine with user data
+  // This runs hidden from the user
 }
 </script>
 
