@@ -32,7 +32,6 @@
             <button @click="addTab('code'); showNewTabMenu = false">💻 Code</button>
             <button @click="addTab('notes'); showNewTabMenu = false">📒 Notes</button>
             <div class="menu-section">Tools</div>
-            <button @click="addTab('terminal'); showNewTabMenu = false">⬛ Terminal</button>
             <button @click="addTab('files'); showNewTabMenu = false">📁 Files</button>
             <button @click="addTab('calendar'); showNewTabMenu = false">📅 Calendar</button>
             <button @click="addTab('calculator'); showNewTabMenu = false">🔢 Calculator</button>
@@ -109,12 +108,11 @@ const showShortcuts = ref(false)
 // Tab interface
 interface Tab {
   id: string
-  type: 'browser' | 'video' | 'image' | 'markdown' | 'code' | 'terminal' | 'files' | 'calendar' | 'notes' | 'calculator' | 'canvas'
+  type: 'browser' | 'video' | 'image' | 'markdown' | 'code' | 'files' | 'calendar' | 'notes' | 'calculator' | 'canvas'
   title: string
   icon: string
   pane: 'left' | 'right'
 }
-
 // State
 const tabs = ref<Tab[]>([
   { id: 'home', type: 'browser', title: 'Home', icon: '🌐', pane: 'left' }
@@ -243,54 +241,6 @@ const CodeView = defineComponent({
 
 // ============ NEW PANEL TYPES ============
 
-const TerminalView = defineComponent({
-  props: ['tab'],
-  setup() {
-    const history = ref<string[]>(['$ Welcome to 99Pages Terminal', '$ Type "help" for commands'])
-    const input = ref('')
-    
-    function executeCommand() {
-      const cmd = input.value.trim()
-      if (!cmd) return
-      
-      history.value.push(`$ ${cmd}`)
-      
-      const responses: Record<string, string> = {
-        'help': 'Available commands: help, clear, date, echo, whoami, ls, pwd',
-        'clear': '',
-        'date': new Date().toLocaleString(),
-        'whoami': 'user@99pages-os',
-        'ls': 'Documents  Downloads  Pictures  Music  Videos  Projects',
-        'pwd': '/home/user',
-      }
-      
-      if (cmd === 'clear') {
-        history.value = []
-      } else if (cmd.startsWith('echo ')) {
-        history.value.push(cmd.substring(5))
-      } else {
-        history.value.push(responses[cmd] || `Command not found: ${cmd}`)
-      }
-      
-      input.value = ''
-    }
-    
-    return () => h('div', { class: 'terminal-view' }, [
-      h('div', { class: 'terminal-output' }, 
-        history.value.map((line, i) => h('div', { key: i, class: 'terminal-line' }, line))
-      ),
-      h('div', { class: 'terminal-input-row' }, [
-        h('span', { class: 'terminal-prompt' }, '$'),
-        h('input', {
-          class: 'terminal-input',
-          value: input.value,
-          onInput: (e: Event) => input.value = (e.target as HTMLInputElement).value,
-          onKeydown: (e: KeyboardEvent) => e.key === 'Enter' && executeCommand()
-        })
-      ])
-    ])
-  }
-})
 
 const FilesView = defineComponent({
   props: ['tab'],
@@ -663,7 +613,6 @@ function getContentView(tab: Tab | undefined) {
     image: ImageView,
     markdown: MarkdownView,
     code: CodeView,
-    terminal: TerminalView,
     files: FilesView,
     calendar: CalendarView,
     notes: NotesView,
@@ -679,7 +628,6 @@ function addTab(type: Tab['type'], pane: 'left' | 'right' = 'left') {
   const id = `${type}-${Date.now()}`
   const icons: Record<string, string> = {
     browser: '🌐', video: '🎬', image: '🖼️', markdown: '📝', code: '💻',
-    terminal: '⬛', files: '📁', calendar: '📅', notes: '📒', calculator: '🔢', canvas: '🎨'
   }
   tabs.value.push({
     id, type,
@@ -1014,14 +962,6 @@ function navigate() {
 .code-editor { flex: 1; background: rgba(0, 0, 0, 0.3); border: none; color: rgba(200, 220, 255, 0.9); padding: 16px; font-family: 'SF Mono', monospace; font-size: 13px; resize: none; outline: none; tab-size: 2; }
 .code-output { height: 100px; background: rgba(0, 0, 0, 0.5); border-top: 1px solid rgba(0, 200, 255, 0.1); padding: 12px; overflow-y: auto; }
 .code-output pre { font-family: 'SF Mono', monospace; font-size: 12px; color: #34c759; margin: 0; }
-
-/* Terminal */
-.terminal-view { display: flex; flex-direction: column; height: 100%; background: #0a0a0a; }
-.terminal-output { flex: 1; padding: 12px; overflow-y: auto; font-family: 'SF Mono', monospace; font-size: 13px; color: #00ff00; }
-.terminal-line { padding: 2px 0; }
-.terminal-input-row { display: flex; align-items: center; padding: 8px 12px; background: rgba(0, 0, 0, 0.5); border-top: 1px solid rgba(0, 255, 0, 0.1); }
-.terminal-prompt { color: #00ff00; margin-right: 8px; font-family: 'SF Mono', monospace; }
-.terminal-input { flex: 1; background: transparent; border: none; color: #00ff00; font-family: 'SF Mono', monospace; font-size: 13px; outline: none; }
 
 /* Files */
 .files-view { display: flex; flex-direction: column; height: 100%; }
