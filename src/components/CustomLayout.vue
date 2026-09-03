@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 interface Panel {
   id: string
@@ -79,7 +79,6 @@ interface Panel {
 
 const isCustomizing = ref(false)
 const showAddPanel = ref(false)
-const gridRef = ref<HTMLElement | null>(null)
 
 const panels = ref<Panel[]>([
   { id: 'chat', title: 'Chat', icon: '💬', component: 'ChatPanel', x: 0, y: 0, width: 400, height: 600 },
@@ -103,7 +102,7 @@ let dragPanel: Panel | null = null
 let dragOffset = { x: 0, y: 0 }
 
 // Resize state
-let resizePanel: Panel | null = null
+let resizePanelRef: Panel | null = null
 let resizeStart = { x: 0, y: 0, width: 0, height: 0 }
 
 function getPanelStyle(panel: Panel) {
@@ -147,7 +146,7 @@ function stopDrag() {
 }
 
 function startResize(event: MouseEvent | TouchEvent, panel: Panel) {
-  resizePanel = panel
+  resizePanelRef = panel
   const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX
   const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY
   resizeStart = { x: clientX, y: clientY, width: panel.width, height: panel.height }
@@ -159,17 +158,17 @@ function startResize(event: MouseEvent | TouchEvent, panel: Panel) {
 }
 
 function onResize(event: MouseEvent | TouchEvent) {
-  if (!resizePanel) return
+  if (!resizePanelRef) return
   
   const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX
   const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY
   
-  resizePanel.width = Math.max(200, resizeStart.width + (clientX - resizeStart.x))
-  resizePanel.height = Math.max(150, resizeStart.height + (clientY - resizeStart.y))
+  resizePanelRef.width = Math.max(200, resizeStart.width + (clientX - resizeStart.x))
+  resizePanelRef.height = Math.max(150, resizeStart.height + (clientY - resizeStart.y))
 }
 
 function stopResize() {
-  resizePanel = null
+  resizePanelRef = null
   document.removeEventListener('mousemove', onResize)
   document.removeEventListener('mouseup', stopResize)
   document.removeEventListener('touchmove', onResize)

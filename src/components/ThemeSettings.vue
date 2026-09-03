@@ -93,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 
 const currentTheme = ref('dark')
 const currentFont = ref('sf-pro')

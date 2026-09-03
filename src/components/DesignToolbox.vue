@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps<{
   type: 'uxui' | 'junior' | 'senior' | 'director' | 'psychology'
