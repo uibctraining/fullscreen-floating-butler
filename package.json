@@ -19,6 +19,7 @@
     "electron:build": "vite build && tsc -p tsconfig.electron.json && electron-builder"
   },
   "dependencies": {
+    "@heroicons/vue": "^2.2.0",
     "@types/three": "^0.185.4",
     "electron-store": "^11.0.2",
     "golden-layout": "^2.6.0",
