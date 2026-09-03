@@ -1,0 +1,77 @@
+{
+  "name": "99pages-agentic-os",
+  "private": true,
+  "version": "1.0.0",
+  "description": "99Pages Agentic OS - AI Operating System",
+  "author": "Ng Tick Kee",
+  "license": "MIT",
+  "main": "dist-electron/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:electron": "tsc -p tsconfig.electron.json && vite",
+    "build": "vue-tsc -b && vite build",
+    "build:electron": "vue-tsc -b && tsc -p tsconfig.electron.json && vite build && electron-builder",
+    "build:linux": "vue-tsc -b && tsc -p tsconfig.electron.json && vite build && electron-builder --linux",
+    "build:win": "vue-tsc -b && tsc -p tsconfig.electron.json && vite build && electron-builder --win",
+    "preview": "vite preview",
+    "electron:dev": "vite build && tsc -p tsconfig.electron.json && electron .",
+    "electron:build": "vite build && tsc -p tsconfig.electron.json && electron-builder"
+  },
+  "dependencies": {
+    "@types/three": "^0.185.4",
+    "electron-store": "^11.0.2",
+    "golden-layout": "^2.6.0",
+    "three": "^0.185.1",
+    "vue": "^3.5.41"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vue/tsconfig": "^0.9.1",
+    "electron": "^44.1.1",
+    "electron-builder": "^26.15.3",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.2",
+    "vue-tsc": "^3.3.11"
+  },
+  "build": {
+    "appId": "uk.pages99.agentic-os",
+    "productName": "99Pages Agentic OS",
+    "copyright": "Copyright © 2026 Ng Tick Kee",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility",
+      "icon": "public/icon.png",
+      "maintainer": "Ng Tick Kee"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "public/icon.png"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "public/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
