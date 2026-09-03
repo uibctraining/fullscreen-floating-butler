@@ -36,6 +36,9 @@
             <button @click="addTab('calendar'); showNewTabMenu = false">📅 Calendar</button>
             <button @click="addTab('calculator'); showNewTabMenu = false">🔢 Calculator</button>
             <button @click="addTab('canvas'); showNewTabMenu = false">🎨 Canvas</button>
+            <div class="menu-section">Meeting</div>
+            <button @click="addTab('zoom'); showNewTabMenu = false">📹 Zoom</button>
+            <button @click="addTab('meet'); showNewTabMenu = false">🎥 Google Meet</button>
           </div>
 
           <div class="tab-actions">
@@ -108,7 +111,7 @@ const showShortcuts = ref(false)
 // Tab interface
 interface Tab {
   id: string
-  type: 'browser' | 'video' | 'image' | 'markdown' | 'code' | 'files' | 'calendar' | 'notes' | 'calculator' | 'canvas'
+  type: 'browser' | 'video' | 'image' | 'markdown' | 'code' | 'files' | 'calendar' | 'notes' | 'calculator' | 'canvas' | 'zoom' | 'meet'
   title: string
   icon: string
   pane: 'left' | 'right'
@@ -601,6 +604,113 @@ const CanvasView = defineComponent({
 
 // ============ View Registry ============
 
+// ============ MEETING PANELS ============
+
+const ZoomView = defineComponent({
+  props: ["tab"],
+  setup() {
+    const meetingUrl = ref("")
+    const meetingId = ref("")
+    const isJoined = ref(false)
+    
+    function joinMeeting() {
+      if (meetingId.value) {
+        meetingUrl.value = `https://zoom.us/j/${meetingId.value}`
+        isJoined.value = true
+      }
+    }
+    
+    return () => h("div", { class: "meeting-view" }, [
+      !isJoined.value
+        ? h("div", { class: "meeting-join" }, [
+            h("div", { class: "meeting-icon" }, "📹"),
+            h("h2", { class: "meeting-title" }, "Zoom Meeting"),
+            h("input", {
+              class: "meeting-input",
+              placeholder: "Meeting ID (e.g. 123 456 7890)",
+              value: meetingId.value,
+              onInput: (e: Event) => meetingId.value = (e.target as HTMLInputElement).value,
+              onKeydown: (e: KeyboardEvent) => e.key === "Enter" && joinMeeting()
+            }),
+            h("button", {
+              class: "meeting-btn",
+              onClick: joinMeeting
+            }, "Join Meeting"),
+            h("div", { class: "meeting-links" }, [
+              h("a", { href: "https://zoom.us/start", target: "_blank" }, "Start a new meeting"),
+              h("a", { href: "https://zoom.us/schedule", target: "_blank" }, "Schedule a meeting")
+            ])
+          ])
+        : h("div", { class: "meeting-container" }, [
+            h("div", { class: "meeting-toolbar" }, [
+              h("span", { class: "meeting-status" }, "Meeting in progress"),
+              h("button", {
+                class: "meeting-leave",
+                onClick: () => { isJoined.value = false; meetingUrl.value = "" }
+              }, "Leave Meeting")
+            ]),
+            h("iframe", {
+              src: meetingUrl.value,
+              class: "meeting-frame",
+              allow: "camera; microphone; fullscreen; display-capture"
+            })
+          ])
+    ])
+  }
+})
+
+const MeetView = defineComponent({
+  props: ["tab"],
+  setup() {
+    const meetingUrl = ref("")
+    const meetingCode = ref("")
+    const isJoined = ref(false)
+    
+    function joinMeeting() {
+      if (meetingCode.value) {
+        meetingUrl.value = `https://meet.google.com/${meetingCode.value}`
+        isJoined.value = true
+      }
+    }
+    
+    return () => h("div", { class: "meeting-view" }, [
+      !isJoined.value
+        ? h("div", { class: "meeting-join" }, [
+            h("div", { class: "meeting-icon" }, "🎥"),
+            h("h2", { class: "meeting-title" }, "Google Meet"),
+            h("input", {
+              class: "meeting-input",
+              placeholder: "Meeting code (e.g. abc-defg-hij)",
+              value: meetingCode.value,
+              onInput: (e: Event) => meetingCode.value = (e.target as HTMLInputElement).value,
+              onKeydown: (e: KeyboardEvent) => e.key === "Enter" && joinMeeting()
+            }),
+            h("button", {
+              class: "meeting-btn google",
+              onClick: joinMeeting
+            }, "Join Meeting"),
+            h("div", { class: "meeting-links" }, [
+              h("a", { href: "https://meet.google.com/new", target: "_blank" }, "Start a new meeting"),
+              h("a", { href: "https://calendar.google.com", target: "_blank" }, "Schedule in Calendar")
+            ])
+          ])
+        : h("div", { class: "meeting-container" }, [
+            h("div", { class: "meeting-toolbar" }, [
+              h("span", { class: "meeting-status" }, "Meeting in progress"),
+              h("button", {
+                class: "meeting-leave",
+                onClick: () => { isJoined.value = false; meetingUrl.value = "" }
+              }, "Leave Meeting")
+            ]),
+            h("iframe", {
+              src: meetingUrl.value,
+              class: "meeting-frame",
+              allow: "camera; microphone; fullscreen; display-capture"
+            })
+          ])
+    ])
+  }
+})
 function getTabById(id: string): Tab | undefined {
   return tabs.value.find(t => t.id === id)
 }
@@ -617,7 +727,9 @@ function getContentView(tab: Tab | undefined) {
     calendar: CalendarView,
     notes: NotesView,
     calculator: CalculatorView,
-    canvas: CanvasView
+    canvas: CanvasView,
+    zoom: ZoomView,
+    meet: MeetView
   }
   return views[tab.type] || BrowserView
 }
@@ -1030,3 +1142,24 @@ function navigate() {
 .canvas-btn:hover { background: rgba(255, 59, 48, 0.25); }
 .drawing-canvas { flex: 1; background: #fff; cursor: crosshair; }
 </style>
+
+/* Meeting panels */
+.meeting-view { display: flex; flex-direction: column; height: 100%; }
+.meeting-join { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+.meeting-icon { font-size: 64px; }
+.meeting-title { color: rgba(200, 220, 255, 0.9); font-size: 24px; font-weight: 600; }
+.meeting-input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 200, 255, 0.15); color: rgba(200, 220, 255, 0.9); padding: 12px 20px; border-radius: 8px; font-size: 16px; width: 300px; text-align: center; }
+.meeting-input:focus { border-color: #00d4ff; outline: none; }
+.meeting-btn { background: #00d4ff; border: none; color: #000; cursor: pointer; padding: 12px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; transition: all 0.2s; }
+.meeting-btn:hover { background: #00b8d9; transform: scale(1.02); }
+.meeting-btn.google { background: #4285f4; color: #fff; }
+.meeting-btn.google:hover { background: #3367d6; }
+.meeting-links { display: flex; gap: 24px; margin-top: 16px; }
+.meeting-links a { color: rgba(0, 200, 255, 0.7); font-size: 13px; text-decoration: none; }
+.meeting-links a:hover { color: #00d4ff; text-decoration: underline; }
+.meeting-container { display: flex; flex-direction: column; height: 100%; }
+.meeting-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(5, 10, 20, 0.98); border-bottom: 1px solid rgba(0, 200, 255, 0.1); }
+.meeting-status { color: #34c759; font-size: 12px; font-family: 'SF Mono', monospace; }
+.meeting-leave { background: rgba(255, 59, 48, 0.15); border: 1px solid rgba(255, 59, 48, 0.3); color: #ff3b30; cursor: pointer; padding: 6px 16px; border-radius: 6px; font-size: 12px; }
+.meeting-leave:hover { background: rgba(255, 59, 48, 0.25); }
+.meeting-frame { flex: 1; border: none; }
