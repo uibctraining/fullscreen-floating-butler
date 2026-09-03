@@ -39,6 +39,11 @@
             <div class="menu-section">Meeting</div>
             <button @click="addTab('zoom'); showNewTabMenu = false">📹 Zoom</button>
             <button @click="addTab('meet'); showNewTabMenu = false">🎥 Google Meet</button>
+            <div class="menu-section">Social</div>
+            <button @click="addTab('whatsapp'); showNewTabMenu = false">💬 WhatsApp</button>
+            <button @click="addTab('facebook'); showNewTabMenu = false">📘 Facebook</button>
+            <div class="menu-section">Agent</div>
+            <button @click="addTab('inbox'); showNewTabMenu = false">📥 Activity Inbox</button>
           </div>
 
           <div class="tab-actions">
@@ -111,7 +116,7 @@ const showShortcuts = ref(false)
 // Tab interface
 interface Tab {
   id: string
-  type: 'browser' | 'video' | 'image' | 'markdown' | 'code' | 'files' | 'calendar' | 'notes' | 'calculator' | 'canvas' | 'zoom' | 'meet'
+  type: 'browser' | 'video' | 'image' | 'markdown' | 'code' | 'files' | 'calendar' | 'notes' | 'calculator' | 'canvas' | 'zoom' | 'meet' | 'whatsapp' | 'facebook' | 'inbox'
   title: string
   icon: string
   pane: 'left' | 'right'
@@ -711,6 +716,155 @@ const MeetView = defineComponent({
     ])
   }
 })
+// ============ SOCIAL & INBOX PANELS ============
+
+const WhatsAppView = defineComponent({
+  props: ["tab"],
+  setup() {
+    const isLoaded = ref(false)
+    
+    return () => h("div", { class: "social-view" }, [
+      !isLoaded.value
+        ? h("div", { class: "social-join" }, [
+            h("div", { class: "social-icon" }, "💬"),
+            h("h2", { class: "social-title" }, "WhatsApp Web"),
+            h("p", { class: "social-desc" }, "Scan QR code with your phone to link WhatsApp"),
+            h("button", {
+              class: "social-btn whatsapp",
+              onClick: () => isLoaded.value = true
+            }, "Open WhatsApp Web"),
+            h("div", { class: "social-note" }, [
+              h("span", null, "Agent will monitor messages and can auto-reply based on your rules")
+            ])
+          ])
+        : h("div", { class: "social-container" }, [
+            h("div", { class: "social-toolbar" }, [
+              h("span", { class: "social-status" }, "🟢 Connected"),
+              h("span", { class: "social-agent" }, "🤖 Agent monitoring"),
+              h("button", {
+                class: "social-refresh",
+                onClick: () => {}
+              }, "↻ Refresh")
+            ]),
+            h("iframe", {
+              src: "https://web.whatsapp.com",
+              class: "social-frame",
+              allow: "camera; microphone; clipboard-write"
+            })
+          ])
+    ])
+  }
+})
+
+const FacebookView = defineComponent({
+  props: ["tab"],
+  setup() {
+    const isLoaded = ref(false)
+    
+    return () => h("div", { class: "social-view" }, [
+      !isLoaded.value
+        ? h("div", { class: "social-join" }, [
+            h("div", { class: "social-icon" }, "📘"),
+            h("h2", { class: "social-title" }, "Facebook Messenger"),
+            h("p", { class: "social-desc" }, "Access your Facebook messages"),
+            h("button", {
+              class: "social-btn facebook",
+              onClick: () => isLoaded.value = true
+            }, "Open Messenger"),
+            h("div", { class: "social-note" }, [
+              h("span", null, "Agent can help manage messages and notifications")
+            ])
+          ])
+        : h("div", { class: "social-container" }, [
+            h("div", { class: "social-toolbar" }, [
+              h("span", { class: "social-status" }, "🟢 Connected"),
+              h("span", { class: "social-agent" }, "🤖 Agent monitoring"),
+              h("button", {
+                class: "social-refresh",
+                onClick: () => {}
+              }, "↻ Refresh")
+            ]),
+            h("iframe", {
+              src: "https://www.messenger.com",
+              class: "social-frame",
+              allow: "camera; microphone; clipboard-write"
+            })
+          ])
+    ])
+  }
+})
+
+const InboxView = defineComponent({
+  props: ["tab"],
+  setup() {
+    const filter = ref("all")
+    const messages = ref([
+      { id: 1, time: "10:30", type: "action", agent: "Friday", content: "Checked WhatsApp - 3 new messages", status: "done" },
+      { id: 2, time: "10:32", type: "summary", agent: "Friday", content: "Daily email summary: 12 unread, 2 urgent", status: "done" },
+      { id: 3, time: "10:35", type: "alert", agent: "System", content: "Calendar reminder: Team meeting at 11am", status: "pending" },
+      { id: 4, time: "10:40", type: "action", agent: "Friday", content: "Auto-replied to John on WhatsApp: Will check and get back", status: "done" },
+      { id: 5, time: "10:45", type: "report", agent: "Friday", content: "Facebook: 5 new notifications, 2 messages", status: "done" },
+      { id: 6, time: "10:50", type: "task", agent: "Friday", content: "Scheduled: Send report to team at 2pm", status: "pending" },
+    ])
+    
+    const filtered = computed(() => {
+      if (filter.value === "all") return messages.value
+      return messages.value.filter(m => m.type === filter.value)
+    })
+    return () => h("div", { class: "inbox-view" }, [
+      h("div", { class: "inbox-header" }, [
+        h("h2", { class: "inbox-title" }, [
+          h("span", null, "📥 "),
+          h("span", null, "Activity Inbox")
+        ]),
+        h("div", { class: "inbox-filters" }, [
+          h("button", { 
+            class: `inbox-filter ${filter.value === "all" ? "active" : ""}`,
+            onClick: () => filter.value = "all"
+          }, "All"),
+          h("button", {
+            class: `inbox-filter ${filter.value === "action" ? "active" : ""}`,
+            onClick: () => filter.value = "action"
+          }, "Actions"),
+          h("button", {
+            class: `inbox-filter ${filter.value === "summary" ? "active" : ""}`,
+            onClick: () => filter.value = "summary"
+          }, "Summaries"),
+          h("button", {
+            class: `inbox-filter ${filter.value === "alert" ? "active" : ""}`,
+            onClick: () => filter.value = "alert"
+          }, "Alerts"),
+          h("button", {
+            class: `inbox-filter ${filter.value === "report" ? "active" : ""}`,
+            onClick: () => filter.value = "report"
+          }, "Reports")
+        ])
+      ]),
+      h("div", { class: "inbox-list" },
+        filtered.value.map((msg) => h("div", { 
+          key: msg.id, 
+          class: `inbox-item ${msg.type} ${msg.status}`
+        }, [
+          h("div", { class: "inbox-item-header" }, [
+            h("span", { class: "inbox-time" }, msg.time),
+            h("span", { class: "inbox-type" }, msg.type.toUpperCase()),
+            h("span", { class: "inbox-agent" }, `🤖 ${msg.agent}`),
+            h("span", { class: `inbox-status ${msg.status}` }, msg.status === "done" ? "✓" : "⏳")
+          ]),
+          h("div", { class: "inbox-content" }, msg.content),
+          h("div", { class: "inbox-actions" }, [
+            h("button", { class: "inbox-btn" }, "View Details"),
+            h("button", { class: "inbox-btn" }, "Dismiss")
+          ])
+        ]))
+      ),
+      h("div", { class: "inbox-footer" }, [
+        h("span", { class: "inbox-count" }, `${filtered.value.length} items`),
+        h("button", { class: "inbox-clear" }, "Clear All")
+      ])
+    ])
+  }
+})
 function getTabById(id: string): Tab | undefined {
   return tabs.value.find(t => t.id === id)
 }
@@ -729,7 +883,10 @@ function getContentView(tab: Tab | undefined) {
     calculator: CalculatorView,
     canvas: CanvasView,
     zoom: ZoomView,
-    meet: MeetView
+    meet: MeetView,
+    whatsapp: WhatsAppView,
+    facebook: FacebookView,
+    inbox: InboxView
   }
   return views[tab.type] || BrowserView
 }
@@ -1163,3 +1320,55 @@ function navigate() {
 .meeting-leave { background: rgba(255, 59, 48, 0.15); border: 1px solid rgba(255, 59, 48, 0.3); color: #ff3b30; cursor: pointer; padding: 6px 16px; border-radius: 6px; font-size: 12px; }
 .meeting-leave:hover { background: rgba(255, 59, 48, 0.25); }
 .meeting-frame { flex: 1; border: none; }
+
+/* Social panels */
+.social-view { display: flex; flex-direction: column; height: 100%; }
+.social-join { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+.social-icon { font-size: 64px; }
+.social-title { color: rgba(200, 220, 255, 0.9); font-size: 24px; font-weight: 600; }
+.social-desc { color: rgba(150, 170, 200, 0.6); font-size: 14px; }
+.social-btn { border: none; color: #fff; cursor: pointer; padding: 12px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; transition: all 0.2s; }
+.social-btn:hover { transform: scale(1.02); }
+.social-btn.whatsapp { background: #25d366; }
+.social-btn.facebook { background: #1877f2; }
+.social-note { margin-top: 16px; padding: 12px 16px; background: rgba(0, 200, 255, 0.05); border-radius: 8px; border: 1px solid rgba(0, 200, 255, 0.1); }
+.social-note span { color: rgba(0, 200, 255, 0.7); font-size: 12px; }
+.social-container { display: flex; flex-direction: column; height: 100%; }
+.social-toolbar { display: flex; align-items: center; gap: 16px; padding: 8px 16px; background: rgba(5, 10, 20, 0.98); border-bottom: 1px solid rgba(0, 200, 255, 0.1); }
+.social-status { color: #34c759; font-size: 12px; font-family: 'SF Mono', monospace; }
+.social-agent { color: rgba(0, 200, 255, 0.7); font-size: 12px; font-family: 'SF Mono', monospace; }
+.social-refresh { margin-left: auto; background: none; border: 1px solid rgba(0, 200, 255, 0.2); color: #00d4ff; cursor: pointer; padding: 4px 12px; border-radius: 4px; font-size: 12px; }
+.social-refresh:hover { background: rgba(0, 200, 255, 0.1); }
+.social-frame { flex: 1; border: none; }
+
+/* Inbox panel */
+.inbox-view { display: flex; flex-direction: column; height: 100%; }
+.inbox-header { padding: 16px; border-bottom: 1px solid rgba(0, 200, 255, 0.1); }
+.inbox-title { display: flex; align-items: center; gap: 8px; color: rgba(200, 220, 255, 0.9); font-size: 18px; margin-bottom: 12px; }
+.inbox-filters { display: flex; gap: 8px; }
+.inbox-filter { background: rgba(0, 200, 255, 0.05); border: 1px solid rgba(0, 200, 255, 0.1); color: rgba(150, 170, 200, 0.7); cursor: pointer; padding: 6px 12px; border-radius: 20px; font-size: 11px; transition: all 0.2s; }
+.inbox-filter:hover { background: rgba(0, 200, 255, 0.1); color: #00d4ff; }
+.inbox-filter.active { background: rgba(0, 200, 255, 0.2); border-color: #00d4ff; color: #00d4ff; }
+.inbox-list { flex: 1; overflow-y: auto; padding: 8px; }
+.inbox-item { padding: 12px; background: rgba(0, 200, 255, 0.03); border-radius: 8px; margin-bottom: 8px; border-left: 3px solid transparent; transition: all 0.2s; }
+.inbox-item:hover { background: rgba(0, 200, 255, 0.06); }
+.inbox-item.action { border-left-color: #00d4ff; }
+.inbox-item.summary { border-left-color: #34c759; }
+.inbox-item.alert { border-left-color: #ff9500; }
+.inbox-item.report { border-left-color: #af52de; }
+.inbox-item.task { border-left-color: #5ac8fa; }
+.inbox-item-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.inbox-time { color: rgba(150, 170, 200, 0.5); font-size: 11px; font-family: 'SF Mono', monospace; }
+.inbox-type { color: rgba(0, 200, 255, 0.7); font-size: 10px; font-family: 'SF Mono', monospace; padding: 2px 6px; background: rgba(0, 200, 255, 0.1); border-radius: 4px; }
+.inbox-agent { color: rgba(150, 170, 200, 0.5); font-size: 11px; margin-left: auto; }
+.inbox-status { font-size: 14px; }
+.inbox-status.done { color: #34c759; }
+.inbox-status.pending { color: #ff9500; }
+.inbox-content { color: rgba(200, 220, 255, 0.8); font-size: 13px; line-height: 1.5; }
+.inbox-actions { display: flex; gap: 8px; margin-top: 8px; }
+.inbox-btn { background: none; border: 1px solid rgba(0, 200, 255, 0.15); color: rgba(0, 200, 255, 0.7); cursor: pointer; padding: 4px 10px; border-radius: 4px; font-size: 11px; }
+.inbox-btn:hover { background: rgba(0, 200, 255, 0.1); }
+.inbox-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-top: 1px solid rgba(0, 200, 255, 0.1); }
+.inbox-count { color: rgba(150, 170, 200, 0.5); font-size: 12px; }
+.inbox-clear { background: none; border: 1px solid rgba(255, 59, 48, 0.2); color: rgba(255, 59, 48, 0.7); cursor: pointer; padding: 4px 12px; border-radius: 4px; font-size: 11px; }
+.inbox-clear:hover { background: rgba(255, 59, 48, 0.1); }
