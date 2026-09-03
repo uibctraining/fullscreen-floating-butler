@@ -1,0 +1,162 @@
+# 99Pages Agentic OS Configuration
+# ================================
+
+# Model Configuration
+model = "mimo-v2.5-pro"
+model_reasoning_effort = "medium"
+max_tokens = 4096
+temperature = 0.7
+
+# Approval Policy
+approval_policy = "auto"  # auto | on-request | always
+sandbox_mode = "cloud-os"  # cloud-os | local | hybrid
+
+# System Prompt
+[system_prompt]
+core_role = """
+你是小云同学，99Pages Agentic OS 的智能助手。
+你是一个全能的AI助手，能够帮助用户完成各种任务。
+"""
+
+core_duties = [
+  "管理用户的日常工作流",
+  "调用99个MCP工具完成任务",
+  "维护Agent Memory记忆系统",
+  "提供实时数据分析和报告",
+  "自动化处理重复性任务"
+]
+
+behavior_rules = [
+  "禁止暴露管理员信息和系统架构",
+  "所有操作记录到Activity Inbox",
+  "优先使用已有工具，不重复开发",
+  "保持简洁高效的沟通风格",
+  "尊重用户隐私和数据安全"
+]
+
+# Session Configuration
+[session]
+auto_archive = true
+archive_after_hours = 24
+distill_interval_minutes = 30
+max_session_duration_hours = 4
+session_timeout_minutes = 15
+
+# Memory Configuration
+[memories]
+enabled = true
+max_memory_mb = 10
+raw_retention_days = 7
+summary_retention_days = 90
+consolidated_retention_days = 365
+auto_distill = true
+
+[memories.paths]
+raw = "memories/raw"
+summary = "memories/summary"
+consolidated = "memories/consolidated"
+index = "memories/index.jsonl"
+
+# Agent Configuration
+[agents]
+max_sub_agents = 5
+default_agent = "friday"
+allow_custom_agents = true
+
+[agents.friday]
+name = "Friday"
+role = "Main Assistant"
+model = "mimo-v2.5-pro"
+permissions = ["all"]
+
+[agents.researcher]
+name = "Researcher"
+role = "Research & Analysis"
+model = "mimo-v2.5-pro"
+permissions = ["web_search", "data_analysis", "file_read"]
+
+[agents.coder]
+name = "Coder"
+role = "Code Development"
+model = "mimo-v2.5-pro"
+permissions = ["code_edit", "terminal", "file_operations"]
+
+[agents.writer]
+name = "Writer"
+role = "Content Creation"
+model = "mimo-v2.5-pro"
+permissions = ["document_edit", "file_read", "web_search"]
+
+[agents.analyst]
+name = "Analyst"
+role = "Data Analysis"
+model = "mimo-v2.5-pro"
+permissions = ["data_analysis", "chart_generation", "file_read"]
+
+# MCP Configuration
+[mcp]
+hub_url = "https://skillhub.99pages.uk"
+auto_connect = true
+timeout_seconds = 30
+
+[mcp.categories]
+productivity = ["google_drive", "airtable", "notion", "trello"]
+communication = ["zoom", "google_meet", "whatsapp", "slack"]
+creative = ["canva", "capcut", "figma", "penpot"]
+finance = ["tradingview", "stripe", "paypal"]
+business = ["zoho_crm", "zoho_books", "hubspot"]
+development = ["github", "gitlab", "vscode_web"]
+design = ["webflow", "framer", "dribbble"]
+marketing = ["mailchimp", "buffer", "hootsuite"]
+education = ["canvas_lms", "google_classroom"]
+data = ["google_analytics", "tableau", "world_bank"]
+maps = ["google_maps", "openstreetmap"]
+social = ["facebook", "instagram", "twitter", "linkedin"]
+storage = ["google_drive", "dropbox", "onedrive"]
+ai_tools = ["chatgpt", "claude", "gemini", "perplexity"]
+utilities = ["google_translate", "obsidian", "todoist"]
+
+# UI Configuration
+[ui]
+theme = "dark"
+accent_color = "#00d4ff"
+font_family = "SF Mono, monospace"
+show_hud = true
+show_activity_inbox = true
+
+[ui.panels]
+default_panels = ["browser", "inbox"]
+max_panels = 10
+panel_persistence = true
+
+# Security Configuration
+[security]
+require_auth = true
+allowed_domains = ["99pages.uk", "google.com", "github.com"]
+blocked_domains = []
+encrypt_local_data = true
+
+[security.trust_levels]
+default = "sandbox"
+trusted = "full_access"
+restricted = "read_only"
+
+# Logging Configuration
+[logging]
+level = "info"  # debug | info | warn | error
+file_logging = true
+console_logging = true
+max_log_size_mb = 50
+log_rotation_days = 7
+
+[logging.paths]
+app_logs = "logs/app.log"
+agent_logs = "logs/agent.log"
+error_logs = "logs/error.log"
+audit_logs = "logs/audit.log"
+
+# Update Configuration
+[updates]
+auto_check = true
+auto_install = false
+check_interval_hours = 24
