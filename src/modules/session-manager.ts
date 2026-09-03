@@ -1,14 +1,10 @@
 /**
- * 99Pages Agentic OS - Session Manager
- * =====================================
+ * 99Pages Agentic OS - Session Manager (Browser Version)
+ * ======================================================
  * 
  * Manages user sessions, conversation history, and session state.
- * Inspired by Codex's session management with JSONL indexing.
+ * Uses localStorage and IndexedDB for browser storage.
  */
-
-import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs/promises';
-import path from 'path';
 
 // Types
 export interface Session {
@@ -57,22 +53,34 @@ export interface SessionIndex {
 
 // Session Manager Class
 export class SessionManager {
-  private sessionsDir: string;
-  private indexPath: string;
+  private storageKey = '99pages_sessions';
+  private indexKey = '99pages_session_index';
   private activeSessions: Map<string, Session> = new Map();
-
-  constructor(baseDir: string) {
-    this.sessionsDir = path.join(baseDir, 'sessions');
-    this.indexPath = path.join(baseDir, 'session_index.jsonl');
-  }
 
   /**
    * Initialize session manager
    */
   async initialize(): Promise<void> {
-    await fs.mkdir(this.sessionsDir, { recursive: true });
-    await fs.mkdir(path.join(this.sessionsDir, 'active'), { recursive: true });
-    await fs.mkdir(path.join(this.sessionsDir, 'archived'), { recursive: true });
+    // Load existing sessions from localStorage
+    const saved = localStorage.getItem(this.indexKey);
+    if (saved) {
+      try {
+        // Sessions are loaded on demand
+      } catch (e) {
+        console.error('Failed to load session index:', e);
+      }
+    }
+  }
+
+  /**
+   * Generate UUID
+   */
+  private generateId(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 
   /**
@@ -80,7 +88,7 @@ export class SessionManager {
    */
   async createSession(userId: string, title?: string): Promise<Session> {
     const session: Session = {
-      id: uuidv4(),
+      id: this.generateId(),
       userId,
       title: title || `Session ${new Date().toISOString()}`,
       status: 'active',
@@ -101,7 +109,7 @@ export class SessionManager {
     // Save to memory
     this.activeSessions.set(session.id, session);
 
-    // Save to disk
+    // Save to localStorage
     await this.saveSession(session);
     await this.updateIndex(session);
 
@@ -117,16 +125,20 @@ export class SessionManager {
       return this.activeSessions.get(sessionId)!;
     }
 
-    // Load from disk
+    // Load from localStorage
     try {
-      const sessionPath = path.join(this.sessionsDir, 'active', `${sessionId}.json`);
-      const data = await fs.readFile(sessionPath, 'utf-8');
-      const session = JSON.parse(data);
-      this.activeSessions.set(sessionId, session);
-      return session;
-    } catch {
-      return null;
+      const key = `${this.storageKey}_${sessionId}`;
+      const data = localStorage.getItem(key);
+      if (data) {
+        const session = JSON.parse(data);
+        this.activeSessions.set(sessionId, session);
+        return session;
+      }
+    } catch (e) {
+      console.error('Failed to load session:', e);
     }
+
+    return null;
   }
 
   /**
@@ -144,7 +156,7 @@ export class SessionManager {
     }
 
     const message: Message = {
-      id: uuidv4(),
+      id: this.generateId(),
       role,
       content,
       timestamp: new Date(),
@@ -259,13 +271,7 @@ export class SessionManager {
     session.status = 'archived';
     session.updatedAt = new Date();
 
-    // Move to archived directory
-    const activePath = path.join(this.sessionsDir, 'active', `${sessionId}.json`);
-    const archivedPath = path.join(this.sessionsDir, 'archived', `${sessionId}.json`);
-
-    await fs.writeFile(archivedPath, JSON.stringify(session, null, 2));
-    await fs.unlink(activePath);
-
+    await this.saveSession(session);
     await this.updateIndex(session);
 
     // Remove from active sessions
@@ -280,29 +286,29 @@ export class SessionManager {
     status?: Session['status'],
     limit?: number
   ): Promise<SessionIndex[]> {
-    const indexData = await fs.readFile(this.indexPath, 'utf-8');
-    const lines = indexData.trim().split('\n').filter(Boolean);
-    
-    let sessions: SessionIndex[] = lines.map(line => JSON.parse(line));
-    
+    const saved = localStorage.getItem(this.indexKey);
+    if (!saved) return [];
+
+    let sessions: SessionIndex[] = JSON.parse(saved);
+
     // Filter by user
     sessions = sessions.filter(s => s.userId === userId);
-    
+
     // Filter by status
     if (status) {
       sessions = sessions.filter(s => s.status === status);
     }
-    
+
     // Sort by updated time (newest first)
-    sessions.sort((a, b) => 
+    sessions.sort((a, b) =>
       new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
-    
+
     // Apply limit
     if (limit) {
       sessions = sessions.slice(0, limit);
     }
-    
+
     return sessions;
   }
 
@@ -324,15 +330,11 @@ export class SessionManager {
   }
 
   /**
-   * Save session to disk
+   * Save session to localStorage
    */
   private async saveSession(session: Session): Promise<void> {
-    const sessionPath = path.join(
-      this.sessionsDir,
-      'active',
-      `${session.id}.json`
-    );
-    await fs.writeFile(sessionPath, JSON.stringify(session, null, 2));
+    const key = `${this.storageKey}_${session.id}`;
+    localStorage.setItem(key, JSON.stringify(session));
   }
 
   /**
@@ -350,32 +352,24 @@ export class SessionManager {
     };
 
     // Read existing index
-    let lines: string[] = [];
-    try {
-      const data = await fs.readFile(this.indexPath, 'utf-8');
-      lines = data.trim().split('\n').filter(Boolean);
-    } catch {
-      // File doesn't exist yet
+    let sessions: SessionIndex[] = [];
+    const saved = localStorage.getItem(this.indexKey);
+    if (saved) {
+      sessions = JSON.parse(saved);
     }
 
     // Update or add entry
-    const existingIndex = lines.findIndex(line => {
-      const entry = JSON.parse(line);
-      return entry.id === session.id;
-    });
-
+    const existingIndex = sessions.findIndex(s => s.id === session.id);
     if (existingIndex >= 0) {
-      lines[existingIndex] = JSON.stringify(indexEntry);
+      sessions[existingIndex] = indexEntry;
     } else {
-      lines.push(JSON.stringify(indexEntry));
+      sessions.push(indexEntry);
     }
 
     // Write back
-    await fs.writeFile(this.indexPath, lines.join('\n') + '\n');
+    localStorage.setItem(this.indexKey, JSON.stringify(sessions));
   }
 }
 
 // Export singleton
-export const sessionManager = new SessionManager(
-  process.env.SESSION_DIR || './data'
-);
+export const sessionManager = new SessionManager();

@@ -6,8 +6,8 @@
  * and coordinates responses. Inspired by Codex and Kimi Desktop.
  */
 
-import { sessionManager, Session, Message } from './session-manager';
-import { permissionManager, PermissionRequest } from './permission-manager';
+import { sessionManager, type Session, type Message } from './session-manager';
+import { permissionManager, type PermissionRequest } from './permission-manager';
 
 // Types
 export interface AgentConfig {
@@ -392,5 +392,5 @@ export class AgentLoop {
 
 // Export singleton
 export const agentLoop = new AgentLoop(
-  process.env.MCP_HUB_URL || 'https://skillhub.99pages.uk'
+  'https://skillhub.99pages.uk'
 );

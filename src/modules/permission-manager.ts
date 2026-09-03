@@ -394,11 +394,10 @@ export class PermissionManager {
   }
 
   /**
-   * Save rules to file
+   * Save rules to localStorage
    */
-  async saveRulesToFile(filePath: string): Promise<void> {
-    const fs = await import('fs/promises');
-    await fs.writeFile(filePath, JSON.stringify(this.rules, null, 2));
+  async saveRulesToFile(_filePath: string): Promise<void> {
+    localStorage.setItem('permission_rules', JSON.stringify(this.rules));
   }
 }
 
