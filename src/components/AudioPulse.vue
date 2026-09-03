@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 
 const props = withDefaults(defineProps<{
   isActive?: boolean
@@ -72,7 +72,6 @@ const props = withDefaults(defineProps<{
 })
 
 // Audio bars animation
-const barHeights = ref<number[]>(new Array(24).fill(4))
 
 function getBarHeight(index: number): number {
   if (!props.isActive) return 4

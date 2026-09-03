@@ -41,6 +41,9 @@
           <!-- Credits Page -->
           <CreditsPage v-else-if="currentSection === 'credits' || showCredits" @close="showCredits = false" />
 
+          <!-- MCP Manager -->
+          <MCPManager v-else-if="currentSection === 'plugins'" />
+
           <!-- Default View -->
           <div v-else class="default-view">
             <FridayAvatar :status="fridayStatus" :is-listening="isListening" />
@@ -84,6 +87,7 @@ import QuickActions from './components/QuickActions.vue'
 import StatusBar from './components/StatusBar.vue'
 import SettingsPage from './components/SettingsPage.vue'
 import CreditsPage from './components/CreditsPage.vue'
+import MCPManager from './components/MCPManager.vue'
 
 interface Message {
   id: number
