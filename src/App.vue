@@ -74,6 +74,9 @@
       :is-listening="isListening"
       :credits="credits"
     />
+
+    <!-- Tour Guide (First-time users) -->
+    <TourGuide />
   </div>
 </template>
 
@@ -92,6 +95,7 @@ import SettingsPage from './components/SettingsPage.vue'
 import CreditsPage from './components/CreditsPage.vue'
 import MCPManager from './components/MCPManager.vue'
 import SocialMediaManager from './components/SocialMediaManager.vue'
+import TourGuide from './components/TourGuide.vue'
 
 interface Message {
   id: number
