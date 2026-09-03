@@ -44,6 +44,9 @@
           <!-- MCP Manager -->
           <MCPManager v-else-if="currentSection === 'plugins'" />
 
+          <!-- Social Media Manager -->
+          <SocialMediaManager v-else-if="currentSection === 'social'" />
+
           <!-- Default View -->
           <div v-else class="default-view">
             <FridayAvatar :status="fridayStatus" :is-listening="isListening" />
@@ -88,6 +91,7 @@ import StatusBar from './components/StatusBar.vue'
 import SettingsPage from './components/SettingsPage.vue'
 import CreditsPage from './components/CreditsPage.vue'
 import MCPManager from './components/MCPManager.vue'
+import SocialMediaManager from './components/SocialMediaManager.vue'
 
 interface Message {
   id: number
