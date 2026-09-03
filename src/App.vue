@@ -47,6 +47,9 @@
           <!-- Social Media Manager -->
           <SocialMediaManager v-else-if="currentSection === 'social'" />
 
+          <!-- LLM Council -->
+          <LLMCouncil v-else-if="currentSection === 'council'" />
+
           <!-- Default View -->
           <div v-else class="default-view">
             <FridayAvatar :status="fridayStatus" :is-listening="isListening" />
@@ -96,6 +99,7 @@ import CreditsPage from './components/CreditsPage.vue'
 import MCPManager from './components/MCPManager.vue'
 import SocialMediaManager from './components/SocialMediaManager.vue'
 import TourGuide from './components/TourGuide.vue'
+import LLMCouncil from './components/LLMCouncil.vue'
 
 interface Message {
   id: number
