@@ -44,6 +44,11 @@
             <button @click="addTab('facebook'); showNewTabMenu = false">📘 Facebook</button>
             <div class="menu-section">Agent</div>
             <button @click="addTab('inbox'); showNewTabMenu = false">📥 Activity Inbox</button>
+            <div class="menu-section">Creative</div>
+            <button @click="addTab('capcut'); showNewTabMenu = false">🎬 CapCut</button>
+            <button @click="addTab('canva'); showNewTabMenu = false">🎨 Canva</button>
+            <div class="menu-section">Location</div>
+            <button @click="addTab('map'); showNewTabMenu = false">🗺️ Map</button>
           </div>
 
           <div class="tab-actions">
@@ -116,7 +121,7 @@ const showShortcuts = ref(false)
 // Tab interface
 interface Tab {
   id: string
-  type: 'browser' | 'video' | 'image' | 'markdown' | 'code' | 'files' | 'calendar' | 'notes' | 'calculator' | 'canvas' | 'zoom' | 'meet' | 'whatsapp' | 'facebook' | 'inbox'
+  type: 'browser' | 'video' | 'image' | 'markdown' | 'code' | 'files' | 'calendar' | 'notes' | 'calculator' | 'canvas' | 'zoom' | 'meet' | 'whatsapp' | 'facebook' | 'inbox' | 'capcut' | 'canva' | 'map'
   title: string
   icon: string
   pane: 'left' | 'right'
@@ -865,6 +870,143 @@ const InboxView = defineComponent({
     ])
   }
 })
+// ============ CREATIVE & MAP PANELS ============
+
+const CapCutView = defineComponent({
+  props: ["tab"],
+  setup() {
+    const isLoaded = ref(false)
+    
+    return () => h("div", { class: "creative-view" }, [
+      !isLoaded.value
+        ? h("div", { class: "creative-join" }, [
+            h("div", { class: "creative-icon" }, "🎬"),
+            h("h2", { class: "creative-title" }, "CapCut Video Editor"),
+            h("p", { class: "creative-desc" }, "Professional video editing in your browser"),
+            h("button", {
+              class: "creative-btn capcut",
+              onClick: () => isLoaded.value = true
+            }, "Open CapCut"),
+            h("div", { class: "creative-features" }, [
+              h("span", null, "✂️ Trim & Split"),
+              h("span", null, "🎵 Audio Effects"),
+              h("span", null, "✨ AI Effects"),
+              h("span", null, "📝 Auto Captions")
+            ])
+          ])
+        : h("div", { class: "creative-container" }, [
+            h("div", { class: "creative-toolbar" }, [
+              h("span", { class: "creative-status" }, "🟢 CapCut Active"),
+              h("span", { class: "creative-agent" }, "🤖 Agent can assist"),
+              h("button", {
+                class: "creative-refresh",
+                onClick: () => {}
+              }, "↻ Refresh")
+            ]),
+            h("iframe", {
+              src: "https://www.capcut.com/editor",
+              class: "creative-frame"
+            })
+          ])
+    ])
+  }
+})
+
+const CanvaView = defineComponent({
+  props: ["tab"],
+  setup() {
+    const isLoaded = ref(false)
+    
+    return () => h("div", { class: "creative-view" }, [
+      !isLoaded.value
+        ? h("div", { class: "creative-join" }, [
+            h("div", { class: "creative-icon" }, "🎨"),
+            h("h2", { class: "creative-title" }, "Canva Design"),
+            h("p", { class: "creative-desc" }, "Create stunning designs easily"),
+            h("button", {
+              class: "creative-btn canva",
+              onClick: () => isLoaded.value = true
+            }, "Open Canva"),
+            h("div", { class: "creative-features" }, [
+              h("span", null, "📱 Social Media"),
+              h("span", null, "📄 Documents"),
+              h("span", null, "🎥 Videos"),
+              h("span", null, "🌐 Websites")
+            ])
+          ])
+        : h("div", { class: "creative-container" }, [
+            h("div", { class: "creative-toolbar" }, [
+              h("span", { class: "creative-status" }, "🟢 Canva Active"),
+              h("span", { class: "creative-agent" }, "🤖 Agent can assist"),
+              h("button", {
+                class: "creative-refresh",
+                onClick: () => {}
+              }, "↻ Refresh")
+            ]),
+            h("iframe", {
+              src: "https://www.canva.com",
+              class: "creative-frame"
+            })
+          ])
+    ])
+  }
+})
+
+const MapView = defineComponent({
+  props: ["tab"],
+  setup() {
+    const searchQuery = ref("")
+    const mapType = ref("standard")
+    
+    return () => h("div", { class: "map-view" }, [
+      h("div", { class: "map-toolbar" }, [
+        h("input", {
+          class: "map-search",
+          placeholder: "Search location...",
+          value: searchQuery.value,
+          onInput: (e: Event) => searchQuery.value = (e.target as HTMLInputElement).value
+        }),
+        h("div", { class: "map-controls" }, [
+          h("button", {
+            class: `map-btn ${mapType.value === "standard" ? "active" : ""}`,
+            onClick: () => mapType.value = "standard"
+          }, "🗺️ Standard"),
+          h("button", {
+            class: `map-btn ${mapType.value === "satellite" ? "active" : ""}`,
+            onClick: () => mapType.value = "satellite"
+          }, "🛰️ Satellite"),
+          h("button", {
+            class: `map-btn ${mapType.value === "traffic" ? "active" : ""}`,
+            onClick: () => mapType.value = "traffic"
+          }, "🚗 Traffic")
+        ])
+      ]),
+      h("iframe", {
+        src: mapType.value === "satellite"
+          ? "https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1000000!2d0!3d0!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2s"
+          : "https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1000000!2d0!3d0!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1",
+        class: "map-frame",
+        allow: "geolocation"
+      }),
+      h("div", { class: "map-info" }, [
+        h("div", { class: "map-legend" }, [
+          h("span", { class: "legend-item" }, [
+            h("span", { class: "legend-dot", style: "background: #34c759" }),
+            h("span", null, "Your Location")
+          ]),
+          h("span", { class: "legend-item" }, [
+            h("span", { class: "legend-dot", style: "background: #ff9500" }),
+            h("span", null, "Saved Places")
+          ]),
+          h("span", { class: "legend-item" }, [
+            h("span", { class: "legend-dot", style: "background: #00d4ff" }),
+            h("span", null, "Agent Suggestions")
+          ])
+        ])
+      ])
+    ])
+  }
+})
 function getTabById(id: string): Tab | undefined {
   return tabs.value.find(t => t.id === id)
 }
@@ -886,7 +1028,10 @@ function getContentView(tab: Tab | undefined) {
     meet: MeetView,
     whatsapp: WhatsAppView,
     facebook: FacebookView,
-    inbox: InboxView
+    inbox: InboxView,
+    capcut: CapCutView,
+    canva: CanvaView,
+    map: MapView
   }
   return views[tab.type] || BrowserView
 }
@@ -1372,3 +1517,38 @@ function navigate() {
 .inbox-count { color: rgba(150, 170, 200, 0.5); font-size: 12px; }
 .inbox-clear { background: none; border: 1px solid rgba(255, 59, 48, 0.2); color: rgba(255, 59, 48, 0.7); cursor: pointer; padding: 4px 12px; border-radius: 4px; font-size: 11px; }
 .inbox-clear:hover { background: rgba(255, 59, 48, 0.1); }
+
+/* Creative panels */
+.creative-view { display: flex; flex-direction: column; height: 100%; }
+.creative-join { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+.creative-icon { font-size: 64px; }
+.creative-title { color: rgba(200, 220, 255, 0.9); font-size: 24px; font-weight: 600; }
+.creative-desc { color: rgba(150, 170, 200, 0.6); font-size: 14px; }
+.creative-btn { border: none; color: #fff; cursor: pointer; padding: 12px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; transition: all 0.2s; }
+.creative-btn:hover { transform: scale(1.02); }
+.creative-btn.capcut { background: #000; }
+.creative-btn.canva { background: #7b2ff7; }
+.creative-features { display: flex; gap: 16px; margin-top: 16px; }
+.creative-features span { padding: 8px 12px; background: rgba(0, 200, 255, 0.05); border-radius: 20px; font-size: 12px; color: rgba(150, 170, 200, 0.7); }
+.creative-container { display: flex; flex-direction: column; height: 100%; }
+.creative-toolbar { display: flex; align-items: center; gap: 16px; padding: 8px 16px; background: rgba(5, 10, 20, 0.98); border-bottom: 1px solid rgba(0, 200, 255, 0.1); }
+.creative-status { color: #34c759; font-size: 12px; font-family: 'SF Mono', monospace; }
+.creative-agent { color: rgba(0, 200, 255, 0.7); font-size: 12px; font-family: 'SF Mono', monospace; }
+.creative-refresh { margin-left: auto; background: none; border: 1px solid rgba(0, 200, 255, 0.2); color: #00d4ff; cursor: pointer; padding: 4px 12px; border-radius: 4px; font-size: 12px; }
+.creative-refresh:hover { background: rgba(0, 200, 255, 0.1); }
+.creative-frame { flex: 1; border: none; }
+
+/* Map panel */
+.map-view { display: flex; flex-direction: column; height: 100%; }
+.map-toolbar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: rgba(5, 10, 20, 0.98); border-bottom: 1px solid rgba(0, 200, 255, 0.1); }
+.map-search { flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 200, 255, 0.15); color: rgba(200, 220, 255, 0.9); padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+.map-search:focus { border-color: #00d4ff; outline: none; }
+.map-controls { display: flex; gap: 4px; }
+.map-btn { background: rgba(0, 200, 255, 0.05); border: 1px solid rgba(0, 200, 255, 0.1); color: rgba(150, 170, 200, 0.7); cursor: pointer; padding: 6px 10px; border-radius: 4px; font-size: 11px; }
+.map-btn:hover { background: rgba(0, 200, 255, 0.1); }
+.map-btn.active { background: rgba(0, 200, 255, 0.2); border-color: #00d4ff; color: #00d4ff; }
+.map-frame { flex: 1; border: none; }
+.map-info { padding: 8px 12px; background: rgba(5, 10, 20, 0.98); border-top: 1px solid rgba(0, 200, 255, 0.1); }
+.map-legend { display: flex; gap: 16px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: rgba(150, 170, 200, 0.6); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
